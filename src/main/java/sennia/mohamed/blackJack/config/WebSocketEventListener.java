@@ -44,7 +44,7 @@ public class WebSocketEventListener {
             // Notify other users in each channel and remove the user
             for (String channel : channels) {
                 messagingTemplate.convertAndSend(channel, username + " has disconnected.");
-                channelManager.removeUserFromChannel(channel, username);
+
             }
         }
     }

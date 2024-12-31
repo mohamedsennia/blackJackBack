@@ -12,29 +12,30 @@ import java.io.File;
 public class WebConfig implements WebMvcConfigurer {
     @Value("${upload.dir}")
     private String uploadDir;
+    @Value("${front.url}")
+    private String frontUrl;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:4200","https://senniayapper.netlify.app")
+                .allowedOrigins(frontUrl)
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowCredentials(true);
 
         registry.addMapping("/messages/**   ")
-                .allowedOrigins("http://localhost:4200","https://senniayapper.netlify.app")
+                .allowedOrigins(frontUrl)
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowCredentials(true);
         registry.addMapping("**")
-                .allowedOrigins("http://localhost:4200","https://senniayapper.netlify.app/","null")
+                .allowedOrigins(frontUrl)
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowCredentials(true);
     }
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String link= new File(uploadDir).getAbsolutePath();
-        link=link.replace('\\','/')+'/';
-
         registry.addResourceHandler("/cards/**")
-                .addResourceLocations("file:"+link);
+                .addResourceLocations("file:/cards/");
     }
+
 
 }

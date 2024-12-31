@@ -56,7 +56,7 @@ public Game(GamePlayer player1,GamePlayer player2){
                 intialDeck.add(new Card(i,suit,rank,imgSrc));
                 i=i+1;
             }
-            System.out.println(intialDeck);
+
         }
 
         Collections.shuffle(intialDeck);

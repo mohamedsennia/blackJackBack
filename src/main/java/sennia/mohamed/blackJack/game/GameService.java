@@ -33,8 +33,9 @@ public class GameService {
         }
         if(game!=null&&game.getStatus()==GameStatus.WAITING){
             game.setPlayer2(gamePlayer);
-            System.out.println("Game Started between by "+p.getUserName()+" And "+game.getPlayer1().getPlayer().getUserName());
+            System.out.println("Game Started between by "+game.getPlayer2().getPlayer().getUserName()+" And "+game.getPlayer1().getPlayer().getUserName());
             game.setStatus(GameStatus.ONGOING);
+            System.out.println("SENDING MESSAGES TO "+String.valueOf(game.getPlayer1().getPlayer().getId())+" AND "+game.getPlayer2().getPlayer().getId() );
             this.simpMessagingTemplate.convertAndSendToUser(
                     String.valueOf(game.getPlayer1().getPlayer().getId()),
                     "/topic/games",
@@ -50,7 +51,7 @@ public class GameService {
         }else{
 
             game=new Game(gamePlayer);
-            System.out.println(game);
+
             this.games.put(game.getId(),game);
             System.out.println("Game created by "+p.getUserName());
 
@@ -105,7 +106,18 @@ public class GameService {
                if(game.getPlayer1().isDrawnAce()){
                newScore =newScore+1;
                }
-               game.getPlayer1().setDrawnAce(true);
+              if(newScore+11==21){
+                  newScore=21;
+                  game.getPlayer1().setDrawnAce(false);
+              }else{
+                  if(newScore+11>21){
+                      newScore=newScore+1;
+                      game.getPlayer1().setDrawnAce(false);
+                  }else{
+                      game.getPlayer1().setDrawnAce(true);
+                  }
+              }
+
            }
            //draw card other than ace
            else{
@@ -321,6 +333,16 @@ public class GameService {
     }
     public void fold(int playerId,int gameId){
         Game game=this.games.get(gameId);
+        if(playerId!= game.getNexPlayer()){
+
+            this.simpMessagingTemplate.convertAndSendToUser(
+                    String.valueOf(playerId),
+                    "/topic/errors",
+                    new SocketErrorMessage("You should wait for your turn")
+
+            );
+            return ;
+        }
         if(game.getPlayer1().getPlayer().getId()==playerId){
             if(game.getPlayer1().getState()==GamePlayerState.FOLDED){
 
@@ -348,7 +370,7 @@ public class GameService {
                 return;
             }
             game.getPlayer1().setState(GamePlayerState.FOLDED);
-            game.setNexPlayer(2);
+            game.setNexPlayer(game.getPlayer1().getPlayer().getId());
             if(game.getPlayer1().isDrawnAce()){
                 int oldScore=game.getPlayer1().getScore();
                 if((oldScore+10)<=21){
@@ -411,7 +433,7 @@ public class GameService {
                 return;
             }
             game.getPlayer2().setState(GamePlayerState.FOLDED);
-            game.setNexPlayer(1);
+            game.setNexPlayer(game.getPlayer1().getPlayer().getId());
             if(game.getPlayer2().isDrawnAce()){
                 int oldScore=game.getPlayer2().getScore();
                 if((oldScore+10)<=21){
@@ -423,7 +445,7 @@ public class GameService {
             this.simpMessagingTemplate.convertAndSendToUser(
                     String.valueOf(playerId),
                     "/topic/updates",
-                    new ScoreUpdate(null,game.getPlayer2().getScore(),game.getStatus(),game.getPlayer1().getState(),game.getPlayer1().isDrawnAce())
+                    new ScoreUpdate(null,game.getPlayer2().getScore(),game.getStatus(),game.getPlayer2().getState(),game.getPlayer2().isDrawnAce())
             );
             this.simpMessagingTemplate.convertAndSendToUser(
                     String.valueOf(game.getPlayer1().getPlayer().getId()),
@@ -436,7 +458,7 @@ public class GameService {
                 this.simpMessagingTemplate.convertAndSendToUser(
                         String.valueOf(playerId),
                         "/topic/updates",
-                        new ScoreUpdate(null,game.getPlayer2().getScore(),game.getStatus(),game.getPlayer2().getState(),game.getPlayer1().isDrawnAce())
+                        new ScoreUpdate(null,game.getPlayer2().getScore(),game.getStatus(),game.getPlayer2().getState(),game.getPlayer2().isDrawnAce())
                 );
                 this.simpMessagingTemplate.convertAndSendToUser(
                         String.valueOf(game.getPlayer1().getPlayer().getId()),

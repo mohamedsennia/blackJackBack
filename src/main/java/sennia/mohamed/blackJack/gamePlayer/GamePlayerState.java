@@ -4,6 +4,6 @@ public enum GamePlayerState {
     STOOD,
     FOLDED,
     BUSTED,
-    WON,
+        WON,
     TIED
 }

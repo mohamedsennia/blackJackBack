@@ -21,7 +21,7 @@
     public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         @Autowired
         private  MessageLoggingInterceptor messageLoggingInterceptor;
-        @Value("${front.Url}")
+        @Value("${front.url}")
         private String frontUrl;
         @Override
         public void registerStompEndpoints(StompEndpointRegistry registry) {
